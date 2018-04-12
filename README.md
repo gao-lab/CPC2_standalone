@@ -27,7 +27,7 @@ b. Build third-part packages:
 ----
 	tom@linux$ cd $CPC_HOME
 	tom@linux$ bin/CPC2.py -i (input_seq) -o (result_in_table)
-<br>example: tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
+example: tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
 
 4 Output result
 ----
@@ -36,8 +36,8 @@ Result in table format (delimited by tab):<br>
 
 Contact
 ----
->>See the website for tutorial and more details. (http://cpc2.cbi.pku.edu.cn)<br>
+>See the website for tutorial and more details. (http://cpc2.cbi.pku.edu.cn)<br>
 
->>This is a beta version of CPC2, if have any questions please report to us.<br>
+>This is a beta version of CPC2, if have any questions please report to us.<br>
 
->>Contact: cpc@mail.cbi.pku.edu.cn
+>Contact: cpc@mail.cbi.pku.edu.cn
