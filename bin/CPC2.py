@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# This version is edited at 20190124 for compatibility on OS system
+
 import sys
 import os
 import re
@@ -248,8 +250,7 @@ def calculate_potential(fasta,strand,outfile):
 	ftmp_feat = file(outfile + ".feat","w")
 	ftmp_svm = file(outfile + ".tmp.1","w")
 	ftmp_result = file(outfile,"w")
-	ftmp_result.write("\t".join(map(str,["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","coding_probability","label"]))+"\n")
-	ftmp_result.close()
+	ftmp_result.write("\t".join(map(str,["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","ORF_Start","coding_probability","label"]))+"\n")
 	fickett_obj = Fickett()
 	for seq in seqio.fasta_read(fasta):
 		seqid = seq.id
@@ -266,13 +267,17 @@ def calculate_potential(fasta,strand,outfile):
 		protparam_obj = ProtParam.ProteinAnalysis(str(newseqprot.strip("*")))
 		if pep_len > 0:
 			#fickett_score = fickett_obj.fickett_value(seqCDS)
+			start_pos = start_pos + 1
 			isoelectric_point = protein_param(protparam_obj)
 		else:
 			#fickett_score = 0.0
+			start_pos = 0
 			orf_fullness = -1
 			isoelectric_point = 0.0
+		ftmp_result.write("\t".join(map(str,[seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness,start_pos]))+"\n")
 		ftmp_feat.write("\t".join(map(str,[seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness]))+"\n")
 		ftmp_svm.write("".join(map(str,["999"," 1:",pep_len," 2:",fickett_score," 3:",isoelectric_point," 4:",orf_fullness]))+"\n")
+	ftmp_result.close()
 	ftmp_feat.close()
 	ftmp_svm.close()
 	#return 0
@@ -294,15 +299,45 @@ def calculate_potential(fasta,strand,outfile):
 	os.system('test -x '+ app_svm_predict + ' || echo \"[ERROR] No excutable svm-predict on CPC2 path!\" > /dev/stderr')
 	
 	cmd = app_svm_scale + ' -r ' + data_dir + 'cpc2.range ' + outfile + '.tmp.1 > ' + outfile + '.tmp.2 &&'
-	cmd = cmd + app_svm_predict + ' -b 1 -q ' + outfile + '.tmp.2 ' + data_dir + 'cpc2.model ' + outfile + '.tmp.1 &&'
-	cmd = cmd + 'awk -vOFS="\\t" \'{if ($1 == 1){print $2,"coding"} else if ($1 == 0){print $2,"noncoding"}}\' ' + outfile + '.tmp.1 > ' + outfile + '.tmp.2 &&'
-	cmd = cmd + 'paste ' + outfile + '.feat ' + outfile + '.tmp.2 >>' + outfile
-	(exitstatus, outtext) = commands.getstatusoutput(cmd)
-	os.system('rm -f ' + outfile + '.tmp.1 ' + outfile + '.tmp.2')
+	cmd = cmd + app_svm_predict + ' -b 1 -q ' + outfile + '.tmp.2 ' + data_dir + 'cpc2.model ' + outfile + '.tmp.out'
+	#cmd = cmd + 'awk -vOFS="\\t" \'{if ($1 == 1){print $2,"coding"} else if ($1 == 0){print $2,"noncoding"}}\' ' + outfile + '.tmp.1 > ' + outfile + '.tmp.2 &&'
+	#cmd = cmd + 'paste ' + outfile + '.feat ' + outfile + '.tmp.2 >>' + outfile
+	(exitstatus, outtext) = commands.getstatusoutput(cmd)	
+	
+	'''deal with the output'''
+	#print outfile + '.tmp.out'
+	tmp_file = open(outfile + '.tmp.out','r')
+	prob = {}
+	i = 0
+	# get libsvm output
+	for line in tmp_file:
+		i = i + 1
+		array = line.split(' ')
+		if array[0] == "1":
+			label = "coding"
+		else:
+			label = "noncoding"
+		prob[i] = str(array[1]) + '\t' + label
+	tmp_file.close()
+	# paste to features
+	tmp_file = open(outfile,'r')
+	out_file = open(outfile + '.txt','w')
+	i = 0
+	for line in tmp_file:
+		i = i + 1
+		if i == 1:
+			out_file.write(line)
+		else:
+			line = line.rstrip('\n')
+			out_file.write(line)
+			out_file.write('\t' + prob[i] + '\n')
+	tmp_file.close()
+	out_file.close()
 	#	subprocess.call("Rscript " + outfile + '.r', shell=True)
 	#except:
 	#	pass
 	if exitstatus == 0:
+		os.system('rm -f ' + outfile + '.tmp.1 ' + outfile + '.tmp.2 ' + outfile + '.tmp.out ' + outfile)
 		rm_cmd = "rm -f " + outfile + '.feat'
 		commands.getstatusoutput(rm_cmd)
 		sys.stderr.write("[INFO] Running Done!\n")
