@@ -5,14 +5,13 @@
 import sys
 import os
 import re
-import commands
+import subprocess
 import time
 from optparse import OptionParser,OptionGroup
-
+import six
 import numpy as np
 from Bio.Seq import Seq
 from Bio.SeqUtils import ProtParam
-
 import seqio
 
 def __main():
@@ -80,7 +79,7 @@ class FindCDS:
 		'''
 		while True:
 			try: 
-				codon,index = triplet_got.next()
+				codon,index = next(triplet_got)
 			except StopIteration:
 				break 
 			if codon in starts and codon not in stops:
@@ -91,7 +90,7 @@ class FindCDS:
 				end_extension = False
 				while True:
 					try: 
-						codon,index = triplet_got.next()
+						codon,index = next(triplet_got)
 					except StopIteration:
 						end_extension = True
 						integrity = -1
@@ -247,9 +246,9 @@ def calculate_potential(fasta,strand,outfile):
 	'''
 	strinfoAmbiguous = re.compile("X|B|Z|J|U",re.I)
 	ptU = re.compile("U",re.I)
-	ftmp_feat = file(outfile + ".feat","w")
-	ftmp_svm = file(outfile + ".tmp.1","w")
-	ftmp_result = file(outfile,"w")
+	ftmp_feat = open(outfile + ".feat","w")
+	ftmp_svm = open(outfile + ".tmp.1","w")
+	ftmp_result = open(outfile,"w")
 	ftmp_result.write("\t".join(map(str,["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","ORF_Start","coding_probability","label"]))+"\n")
 	fickett_obj = Fickett()
 	for seq in seqio.fasta_read(fasta):
@@ -302,7 +301,7 @@ def calculate_potential(fasta,strand,outfile):
 	cmd = cmd + app_svm_predict + ' -b 1 -q ' + outfile + '.tmp.2 ' + data_dir + 'cpc2.model ' + outfile + '.tmp.out'
 	#cmd = cmd + 'awk -vOFS="\\t" \'{if ($1 == 1){print $2,"coding"} else if ($1 == 0){print $2,"noncoding"}}\' ' + outfile + '.tmp.1 > ' + outfile + '.tmp.2 &&'
 	#cmd = cmd + 'paste ' + outfile + '.feat ' + outfile + '.tmp.2 >>' + outfile
-	(exitstatus, outtext) = commands.getstatusoutput(cmd)	
+	(exitstatus, outtext) = subprocess.getstatusoutput(cmd)	
 	
 	'''deal with the output'''
 	#print outfile + '.tmp.out'
@@ -339,7 +338,7 @@ def calculate_potential(fasta,strand,outfile):
 	if exitstatus == 0:
 		os.system('rm -f ' + outfile + '.tmp.1 ' + outfile + '.tmp.2 ' + outfile + '.tmp.out ' + outfile)
 		rm_cmd = "rm -f " + outfile + '.feat'
-		commands.getstatusoutput(rm_cmd)
+		subprocess.getstatusoutput(rm_cmd)
 		sys.stderr.write("[INFO] Running Done!\n")
 		return 0
 	else:
