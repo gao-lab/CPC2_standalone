@@ -24,6 +24,7 @@ def __main():
 	Common_group.add_option("-i",dest="fasta",help="input sequence in fasta format [Required]",metavar="FILE",type="string",default=None)
 	Common_group.add_option("-o",dest="outfile",help="output file [Default: cpc2output.txt]",metavar="FILE",type="string",default="cpc2output.txt")
 	Common_group.add_option("-r",dest="reverse",help="also check the reverse strand [Default: FALSE]",action="store_true")
+	Common_group.add_option("--ORF",dest="ORF",help="output the start position of longest ORF [Default: FALSE]",action="store_true")
 	parser.add_option_group(Common_group)
 	(options, args) = parser.parse_args()
 	if options.fasta == None:
@@ -37,7 +38,11 @@ def __main():
 		strand = "-"
 	else:
 		strand = "+"
-	if calculate_potential(options.fasta,strand,options.outfile):
+	if options.ORF:
+		output_orf = 1
+	else:
+		output_orf = 0
+	if calculate_potential(options.fasta,strand,output_orf,options.outfile):
 		return 1
 	sys.stderr.write("[INFO] cost time: %ds\n"%(time.time()-start_time))
 	return 0
@@ -240,7 +245,7 @@ def mRNA_translate(mRNA):
 def protein_param(putative_seqprot):
 	return putative_seqprot.isoelectric_point()
 
-def calculate_potential(fasta,strand,outfile):
+def calculate_potential(fasta,strand,output_orf,outfile):
 	'''
 	Calculate three features: putative peptide length,pI and Fickett
 	And assess coding potential based on SVM model
@@ -250,7 +255,11 @@ def calculate_potential(fasta,strand,outfile):
 	ftmp_feat = file(outfile + ".feat","w")
 	ftmp_svm = file(outfile + ".tmp.1","w")
 	ftmp_result = file(outfile,"w")
-	ftmp_result.write("\t".join(map(str,["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","ORF_Start","coding_probability","label"]))+"\n")
+	if output_orf == 1:
+		my_header = ["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","ORF_Start","coding_probability","label"]
+	else:
+		my_header = ["#ID","transcript_length","peptide_length","Fickett_score","pI","ORF_integrity","coding_probability","label"]
+	ftmp_result.write("\t".join(map(str,my_header))+"\n")
 	fickett_obj = Fickett()
 	for seq in seqio.fasta_read(fasta):
 		seqid = seq.id
@@ -274,7 +283,11 @@ def calculate_potential(fasta,strand,outfile):
 			start_pos = 0
 			orf_fullness = -1
 			isoelectric_point = 0.0
-		ftmp_result.write("\t".join(map(str,[seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness,start_pos]))+"\n")
+		if output_orf == 1:
+			output_line = [seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness,start_pos]
+		else:
+			output_line = [seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness]
+		ftmp_result.write("\t".join(map(str,output_line))+"\n")
 		ftmp_feat.write("\t".join(map(str,[seqid,len(seqRNA),pep_len,fickett_score,isoelectric_point,orf_fullness]))+"\n")
 		ftmp_svm.write("".join(map(str,["999"," 1:",pep_len," 2:",fickett_score," 3:",isoelectric_point," 4:",orf_fullness]))+"\n")
 	ftmp_result.close()
