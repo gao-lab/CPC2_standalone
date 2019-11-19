@@ -1,7 +1,7 @@
 CPC2 standalone
 ====
 
-* 2017-03-6 21:00, Yu-jian Kang
+* 2019-11-19 16:50, Yu-jian Kang
 
 1 Pre-requisite:
 ----
@@ -31,8 +31,13 @@ example: tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
 
 4 Output result
 ----
-Result in table format (delimited by tab):<br>
-#ID	peptide_length	Fickett_score	isoelectric_point	ORF_integrity	coding_probability	coding_label
+The result is in table format (plain text delimited by tab).
+
+Default output:<br>
+#ID	transcript_length	peptide_length	Fickett_score	pI	ORF_integrity	coding_probability	label
+
+Set '--ORF' to output the start position of longest ORF:<br>
+#ID	transcript_length	peptide_length	Fickett_score	pI	ORF_integrity	ORF_Start	coding_probability	label
 
 Contact
 ----
