@@ -162,8 +162,8 @@ def gtf_parse(fn,add="chr"):
 
 if __name__ == "__main__":
 	a = [[1,10],[17,22],[40,44],[42,47],[46,100],[101,408]]
-	print a
-	print merge_region(a)
+	print (a)
+	print (merge_region(a))
 
 
 

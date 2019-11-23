@@ -11,7 +11,7 @@ def gz_file(fq_file,mode,level=6):
 			fq_fp = gzip.open(fq_file,mode+"b",level)
 		else:
 			sys.stderr.write("[INFO] read file '%s'\n"%fq_file)
-			fq_fp = file(fq_file,mode)
+			fq_fp = open(fq_file,mode)
 	except:
 		sys.stderr.write("Error: Fail to IO file: %s\n"%(fq_file))
 		sys.exit(1)
