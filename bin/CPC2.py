@@ -5,7 +5,10 @@
 import sys
 import os
 import re
-import subprocess
+if (sys.version_info[0] == 2):
+	import commands
+else:
+	import subprocess
 import time
 from optparse import OptionParser,OptionGroup
 import six
@@ -317,7 +320,10 @@ def calculate_potential(fasta,strand,output_orf,outfile):
 	cmd = cmd + app_svm_predict + ' -b 1 -q ' + outfile + '.tmp.2 ' + data_dir + 'cpc2.model ' + outfile + '.tmp.out'
 	#cmd = cmd + 'awk -vOFS="\\t" \'{if ($1 == 1){print $2,"coding"} else if ($1 == 0){print $2,"noncoding"}}\' ' + outfile + '.tmp.1 > ' + outfile + '.tmp.2 &&'
 	#cmd = cmd + 'paste ' + outfile + '.feat ' + outfile + '.tmp.2 >>' + outfile
-	(exitstatus, outtext) = subprocess.getstatusoutput(cmd)	
+	if (sys.version_info[0] == 2):
+		(exitstatus, outtext) = commands.getstatusoutput(cmd)
+	else:
+		(exitstatus, outtext) = subprocess.getstatusoutput(cmd)
 	
 	'''deal with the output'''
 	#print outfile + '.tmp.out'
@@ -354,7 +360,10 @@ def calculate_potential(fasta,strand,output_orf,outfile):
 	if exitstatus == 0:
 		os.system('rm -f ' + outfile + '.tmp.1 ' + outfile + '.tmp.2 ' + outfile + '.tmp.out ' + outfile)
 		rm_cmd = "rm -f " + outfile + '.feat'
-		subprocess.getstatusoutput(rm_cmd)
+		if (sys.version_info[0] == 2):
+			commands.getstatusoutput(rm_cmd)
+		else:
+			subprocess.getstatusoutput(rm_cmd)
 		sys.stderr.write("[INFO] Running Done!\n")
 		return 0
 	else:

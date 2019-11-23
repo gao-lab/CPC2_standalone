@@ -1,7 +1,8 @@
 CPC2 standalone
 ====
 
-* 2019-11-19 16:50, Yu-jian Kang
+* 2019-11-23 15:30, Yang Ding
+   - Now CPC2 supports both Python 2 and Python 3 (thanks for help from HyperOdin)
 
 1 Pre-requisite:
 ----
