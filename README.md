@@ -1,7 +1,9 @@
 CPC2 standalone
 ====
 
-* 2017-03-6 21:00, Yu-jian Kang
+* 2020-01-13 14:58, Yu-jian Kang
+* This is a python 2 verison of CPC2 (same with the version of the original paper).
+* Thanks for helps from **HyperOdin**, there is a python 3 version (the release of *CPC2_standalone_python3 v1.0.1*)
 
 1 Pre-requisite:
 ----
