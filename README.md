@@ -29,7 +29,14 @@ b. Build third-part packages:
 ----
 	tom@linux$ cd $CPC_HOME
 	tom@linux$ bin/CPC2.py -i (input_seq) -o (result_in_table)
-example: tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
+	
+Example:
+	
+	tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
+	
+If you want to output predicted peptide sequncese, use CPC2_output_peptide.py with "--ORF" option:
+
+	tom@linux$ bin/CPC2_output_peptide.py -i data/example.fa -o example_output --ORF
 
 4 Output result
 ----
