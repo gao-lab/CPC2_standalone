@@ -34,7 +34,7 @@ Example:
 	
 	tom@linux$ bin/CPC2.py -i data/example.fa -o example_output
 	
-If you want to output predicted peptide sequncese, use CPC2_output_peptide.py with "--ORF" option:
+If you want to output predicted peptide sequence, use CPC2_output_peptide.py with "--ORF" option:
 
 	tom@linux$ bin/CPC2_output_peptide.py -i data/example.fa -o example_output --ORF
 
